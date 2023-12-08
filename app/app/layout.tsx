@@ -54,6 +54,7 @@ export default async function RootLayout({
     @param form - FormData object containing the username and name of the new user
   */
   const setUpProfile = async (form: FormData) => {
+    'use server';
     /*
       TODO #1: Indicate that this function is a server function by adding 'use server';
     */
@@ -66,11 +67,24 @@ export default async function RootLayout({
         - Use the newPrivateKey() function to generate a new private key for the user
     */
 
+    const privateKey = newPrivateKey();
+
+
+
     /* 
       TODO #3: Store the user in the local account cache
 
       HINT: Use the storeUser() function to store the user
     */
+
+    const user = {
+      username: form.get('username') as string,
+      name: form.get('name') as string,
+      privateKey,
+    };
+
+
+    storeUser(user);
 
     /* 
       TODO #4: Set up a try catch block to create the user's profile and log them in if successful.
@@ -83,6 +97,15 @@ export default async function RootLayout({
           from the local account cache. Then, throw the error to be caught by the catch block in
           the loginWindow.tsx file.
     */
+
+    try {
+      await createProfile(user);
+      await login(user);
+    } catch (error) {
+      dropUser(user);
+      console.log(error)
+      throw error;
+    }
   }
 
   if (!me) {
@@ -95,11 +118,11 @@ export default async function RootLayout({
             <div className='w-full max-w-xs space-y-6 rounded-xl border border-neutral-300 bg-neutral-400 px-6 py-4'>
               <p className='text-2xl font-bold'>Log in to Over Network</p>
               {
-                await getNumberOfUsers() >= 2 ? 
-                <p className='text-sm font-medium text-neutral-100'>
-                  You have reached the maximum number of accounts.
-                </p> :
-                <LoginWindow setUpProfile={setUpProfile} /> 
+                await getNumberOfUsers() >= 2 ?
+                  <p className='text-sm font-medium text-neutral-100'>
+                    You have reached the maximum number of accounts.
+                  </p> :
+                  <LoginWindow setUpProfile={setUpProfile} />
               }
               <Accounts />
             </div>

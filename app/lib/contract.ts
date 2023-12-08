@@ -27,6 +27,7 @@ const FUNDING_THRESHOLD = 500_0000;
 
 async function fundAccount(accountToFund: AptosAccount) {
   if (FUNDING_ACCOUNT_PRIVATE_KEY) {
+
     const fundingAccount = new AptosAccount(
       new HexString(FUNDING_ACCOUNT_PRIVATE_KEY).toUint8Array()
     );
@@ -65,14 +66,14 @@ export async function createProfileIfNeeded(user: Omit<User, 'followers' | 'foll
         type_arguments: [],
         arguments: [user.username, user.name, user.imgSrc || '', []],
       });
-    
+
       const txnResponse = await provider.signAndSubmitTransaction(
         aptAccount,
         rawTxn
       );
-    
+
       const txnResults = await provider.waitForTransactionWithResult(txnResponse) as any;
-    
+
       if (txnResults.success === false) {
         throw new Error(txnResults.vm_status.split('E')[1].split('(')[0]);
       }
@@ -84,14 +85,14 @@ export async function createProfileIfNeeded(user: Omit<User, 'followers' | 'foll
       type_arguments: [],
       arguments: [user.username, user.name, user.imgSrc || '', []],
     });
-  
+
     const txnResponse = await provider.signAndSubmitTransaction(
       aptAccount,
       rawTxn
     );
-  
+
     const txnResults = await provider.waitForTransactionWithResult(txnResponse) as any;
-  
+
     if (txnResults.success === false) {
       throw new Error(txnResults.vm_status.split('E')[1].split('(')[0]);
     }
@@ -103,6 +104,7 @@ export async function createProfile(user: Omit<User, 'followers' | 'following'>)
   let aptAccount = new AptosAccount(
     new HexString(user.privateKey).toUint8Array()
   );
+
 
   await fundAccount(aptAccount);
 
